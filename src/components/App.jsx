@@ -3,7 +3,7 @@ import DataTable from "./DataTable";
 // import {styled, css} from 'styled-components'
 import styled from 'styled-components'
 import {FlexContainer} from "./StyledComponents";
-
+import data from '../data'
 
 const Wrapper = styled(FlexContainer)`
 flex-direction: column;
@@ -24,12 +24,13 @@ export default function App() {
             let data = await res.json()
             console.log(data)
         }
+
         getData()
     }, [])
     return (
         <Wrapper>
             <h1>Restaurant data</h1>
-            <DataTable/>
+            <DataTable data={data}/>
         </Wrapper>
     )
 }
