@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {FlexContainer} from "./StyledComponents";
 
 
@@ -22,6 +22,7 @@ const PaginationControl = styled.button`
 height: 2rem;
 `
 export default function DataTable({data}) {
+    let searchRef = useRef()
     const DATA = data.sort(((a, b) => ('' + a.name).localeCompare(b.name)))
     let genreChoices = []
     new Set(
@@ -33,6 +34,8 @@ export default function DataTable({data}) {
         end: 10,
         currPage: 1,
         filter: 'All',
+        feedback: '',
+        query: '',
         totalPage: Math.ceil(DATA.length / 10)
     })
     let nextPage = () => {
@@ -60,11 +63,38 @@ export default function DataTable({data}) {
 
     function applyFilter(e) {
         setState(prev => ({...prev, filter: e.target.value}))
-        console.log('changed the genre filter')
+    }
+
+    function filterBySearch() {
+        let query = searchRef.current.value
+        if (query.length) {
+            if (query.length > 3) {
+                setState(prev => ({...prev, query, feedback: ''}))
+            } else {
+                setState(prev => ({...prev, feedback: 'Query should be at least 4 character long.'}))
+            }
+        } else
+            setState(prev => ({...prev, query: '', feedback: ''}))
+
     }
 
     return (
         <Wrapper>
+            <div className="search-control">
+                <label htmlFor={'search'}>
+                    <button onClick={(e) => filterBySearch()}>Search</button>
+                </label>
+                <input type={'text'} name={'search'} id={'search'} ref={searchRef}
+                       onKeyPress={(e) => {
+                           if (e.key === 'Enter') filterBySearch()
+                       }}
+                       onInput={e => {
+                           if (!e.target.value.length) setState(prev => ({...prev, query: '', feedback: ''}))
+                       }}
+                />
+            </div>
+            {state.feedback && <div className="feedback">{state.feedback}</div>}
+
             <table>
                 <thead>
                 <tr>
@@ -86,11 +116,18 @@ export default function DataTable({data}) {
                 <tbody>
                 {DATA
                     .slice(state.start, state.end)
+                    .filter((row) => state.query ? (
+                        row.name.includes(state.query)
+                        ||
+                        row.city.includes(state.query)
+                        ||
+                        row.genre.includes(state.query)
+                    ) : true)
                     .filter((row) => state.filter === 'All' ? true : row.genre.split(',').some((g) => g === state.filter))
                     .map((row, index) => {
                         return (
                             <tr key={index}>
-                                <td>{index+1}</td>
+                                <td>{index + 1}</td>
                                 <td>{row.name}</td>
                                 <td>{row.city}</td>
                                 <td>{row.state}</td>
