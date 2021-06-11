@@ -115,7 +115,6 @@ export default function DataTable({data}) {
                 </thead>
                 <tbody>
                 {DATA
-                    .slice(state.start, state.end)
                     .filter((row) => state.query ? (
                         row.name.includes(state.query)
                         ||
@@ -123,6 +122,7 @@ export default function DataTable({data}) {
                         ||
                         row.genre.includes(state.query)
                     ) : true)
+                    .slice(state.start, state.end)
                     .filter((row) => state.filter === 'All' ? true : row.genre.split(',').some((g) => g === state.filter))
                     .map((row, index) => {
                         return (
